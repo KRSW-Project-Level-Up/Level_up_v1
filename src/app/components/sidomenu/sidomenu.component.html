@@ -1,0 +1,64 @@
+<div class="outer-full">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Fixed Side menu -->
+      <nav
+        class="col-md-3 col-lg-2 d-md-block bg-dark text-white fixed-sidebar"
+        id="sidebarMenu"
+      >
+        <!-- Sidebar content -->
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active text-white" routerLink="home">
+                <h2>Home</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="userProfile">
+                <h2>User Profile</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="/playlist">
+                <h2>Playlist</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="/wishlist">
+                <h2>Wishlist</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="newRelease">
+                <h2>New Releases</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="recommendation">
+                <h2>Recommendations</h2>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" routerLink="topIn">
+                <h2>Top in 2023</h2>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Main content area -->
+      <main
+        class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3 offset-lg-2 offset-md-3"
+      >
+        <div class="container-fluid">
+          <div class="row">
+            <!-- Content will be rendered here -->
+            <router-outlet></router-outlet>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,125 @@
+<div class="outer-full">
+  <header
+    class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow"
+  >
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="home ">
+      <h2>LEVELUP</h2>
+    </a>
+    <button
+      class="navbar-toggler position-absolute d-md-none collapsed"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <a
+          style="background: red; color: #fff; border-radius: 4px; margin: 10px"
+          class="nav-link px-3 cursor-pointer"
+          (click)="logout()"
+          >Sign out</a
+        >
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3">
+        <!-- Container for games -->
+        <div class="container-fluid">
+          <div class="row">
+            <!-- Loading Message -->
+            <div *ngIf="isLoading" class="col-12 loading-alert">
+              <p>Loading games...</p>
+            </div>
+            <!-- No Game Found Message -->
+            <div
+              *ngIf="!isLoading && detailedGames.length === 0"
+              class="col-12 no-games-alert"
+            >
+              <p>No Game Found.</p>
+            </div>
+            <div
+              *ngFor="let game of detailedGames"
+              class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+            >
+              <div class="panel border bg-white">
+                <div class="panel-heading">
+                  <img [src]="game.background_image" alt="Game Image" />
+                </div>
+                <div class="panel-body p-3">
+                  <h3 class="gameName">
+                    {{
+                      game.name.split(" ").length > 3
+                        ? game.name.split(" ")[0] +
+                          " " +
+                          game.name.split(" ")[1] +
+                          "..."
+                        : game.name
+                    }}
+                  </h3>
+                  <div class="platforms-container my-2">
+                    <ng-container
+                      *ngFor="
+                        let parentPlatform of game.parent_platforms;
+                        let i = index
+                      "
+                    >
+                      <span
+                        class="platform"
+                        *ngIf="parentPlatform.platform && i < 3"
+                      >
+                        <img
+                          [src]="getPlatformIcon(parentPlatform.platform.slug)"
+                          [alt]="parentPlatform.platform.name"
+                        />
+                      </span>
+                      <span
+                        class="platform"
+                        *ngIf="game.parent_platforms.length > 2 && i === 1"
+                      >
+                        <mat-icon>add</mat-icon></span
+                      >
+                    </ng-container>
+                  </div>
+                  <div class="detail rating">
+                    <span class="title">Global Rating:</span>
+                    <span class="value">{{ game.rating }}</span>
+                  </div>
+                  <div class="detail releaseDate">
+                    <span class="title">Release Date:</span>
+                    <span class="value">{{ game.released }}</span>
+                  </div>
+                  <div class="detail genres">
+                    <span class="title">Genres:</span>
+                    <span class="value">
+                      <ng-container
+                        *ngFor="let genre of game.genres; let i = index"
+                      >
+                        <ng-container *ngIf="i === 0">
+                          {{ genre.name }}
+                          <span *ngIf="game.genres.length > 1">, +</span>
+                        </ng-container>
+                      </ng-container>
+                    </span>
+                  </div>
+
+                  <div class="detail chart">
+                    <span class="title">Chart:</span>
+                    <span class="value">#{{ game.rating_top }} Top 2023</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

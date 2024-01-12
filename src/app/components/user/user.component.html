@@ -1,0 +1,57 @@
+<div class="outer-full">
+  <header
+    class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow"
+  >
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="home">
+      <h2>LEVELUP</h2>
+    </a>
+    <button
+      class="navbar-toggler position-absolute d-md-none collapsed"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <a
+          style="background: red; color: #fff; border-radius: 4px; margin: 10px"
+          class="nav-link px-3 cursor-pointer"
+          (click)="logout()"
+          >Sign out</a
+        >
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Side menu -->
+
+      <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3">
+        <!-- Container for games -->
+        <div class="container-fluid">
+          <div class="row">
+            <!-- Container for games -->
+            <div class="container">
+              <div class="row mb-4">
+                <div *ngIf="currentUser">
+                  <h1>User Profile</h1>
+                  <p>First Name: {{ currentUser.firstName }}</p>
+                  <p>Last Name: {{ currentUser.lastName }}</p>
+                  <p>Username: {{ currentUser.userName }}</p>
+                  <p>Email: {{ currentUser.email }}</p>
+                  <!-- Add more fields as necessary -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

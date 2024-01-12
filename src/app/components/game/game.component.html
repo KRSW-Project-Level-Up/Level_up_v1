@@ -1,0 +1,192 @@
+<div class="outer-full">
+  <header
+    class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow"
+  >
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="home">
+      <h2>LEVELUP</h2>
+    </a>
+    <button
+      class="navbar-toggler position-absolute d-md-none collapsed"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <a
+          style="background: red; color: #fff; border-radius: 4px; margin: 10px"
+          class="nav-link px-3 cursor-pointer"
+          (click)="logout()"
+          >Sign out</a
+        >
+      </div>
+    </div>
+  </header>
+  <div class="container-fluid">
+    <div class="row">
+      <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3">
+        <!-- Container for games -->
+        <div class="container-fluid">
+          <div class="row">
+            <!-- Container for games -->
+            <div class="container">
+              <div class="row mb-4">
+                <!-- Screenshot Gallery -->
+                <div class="screenshot-gallery">
+                  <div
+                    *ngFor="let screenshot of game.short_screenshots"
+                    class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+                  >
+                    <div class="screenshot-card">
+                      <img src="{{ screenshot.image }}" class="img-fluid" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12 game-info">
+                  <div class="header-flex-container">
+                    <h2 class="game-title">{{ game.name }}</h2>
+                    <div>
+                      <button class="btn btn-primary" (click)="addToWishlist()">
+                        Add to Wishlist
+                      </button>
+                      <button
+                        class="btn btn-primary"
+                        (click)="addToPlaylist(game.id)"
+                      >
+                        Add to Playlist
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Ratings Section -->
+                  <div class="ratings-section">
+                    <div class="detail-row">
+                      <span class="detail-title">Rating Top:</span>
+                      <span class="detail-value">{{ game.rating }} / 5</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Global Rating:</span>
+                      <span class="detail-value"
+                        >#{{ game.rating_top }} Top 2023</span
+                      >
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Ratings:</span>
+                      <span class="detail-value">
+                        <span *ngFor="let rating of game.ratings">
+                          {{ rating.title }}: {{ rating.percent }}%,
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="game-details">
+                    <div class="detail-row">
+                      <span class="detail-title">Release Date:</span>
+                      <span class="detail-value">{{ game.released }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Genres:</span>
+                      <span class="detail-value">
+                        <span
+                          *ngFor="let genre of game.genres; let last = last"
+                        >
+                          {{ genre.name }}<span *ngIf="!last">, </span>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Platforms:</span>
+                      <span class="detail-value">
+                        <span
+                          *ngFor="
+                            let parentPlatform of game.parent_platforms;
+                            let last = last
+                          "
+                        >
+                          {{ parentPlatform.platform.name
+                          }}<span *ngIf="!last">, </span>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Available On:</span>
+                      <span class="detail-value">
+                        <span
+                          *ngFor="let store of game.stores; let last = last"
+                        >
+                          {{ store.store.name }}<span *ngIf="!last">, </span>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">ESRB Rating:</span>
+                      <span class="detail-value">{{
+                        game.esrb_rating.name
+                      }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Average Playtime:</span>
+                      <span class="detail-value"
+                        >{{ game.playtime }} hours</span
+                      >
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-title">Metacritic:</span>
+                      <span class="detail-value">{{ game.metacritic }}</span>
+                    </div>
+                  </div>
+                  <div class="ratings-section">
+                    <div *ngIf="reviewText" class="game-review">
+                      <span class="detail-title">Review:</span>
+                      <p>{{ reviewText }}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    class="btn btn-primary"
+                    *ngIf="!showReviewInput"
+                    (click)="addReview()"
+                  >
+                    Add Review
+                  </button>
+
+                  <div *ngIf="showReviewInput">
+                    <textarea
+                      class="form-control"
+                      rows="3"
+                      [(ngModel)]="reviewText"
+                      placeholder="Write your review here..."
+                    ></textarea>
+                    <div class="button-group">
+                      <button
+                        class="btn btn-primary mt-2"
+                        (click)="saveReview()"
+                      >
+                        Save
+                      </button>
+                      <button
+                        class="btn btn-danger mt-2"
+                        (click)="cancelReview()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

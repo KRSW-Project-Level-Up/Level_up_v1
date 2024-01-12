@@ -1,0 +1,166 @@
+<div class="outer-full">
+  <header
+    class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow"
+  >
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="home ">
+      <h2>LEVELUP</h2>
+    </a>
+    <button
+      class="navbar-toggler position-absolute d-md-none collapsed"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <input
+      class="form-control form-control-dark w-100 rounded-0 border-0"
+      type="text"
+      placeholder="Search"
+      aria-label="Search"
+      [(ngModel)]="searchTerm"
+      (keyup)="filterGames()"
+    />
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap">
+        <a
+          style="background: red; color: #fff; border-radius: 4px; margin: 10px"
+          class="nav-link px-3 cursor-pointer"
+          (click)="logout()"
+          >Sign out</a
+        >
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3">
+        <!-- Container for games -->
+        <div class="container-fluid">
+          <div class="row">
+            <!-- Display game cards if games are available -->
+            <div
+              *ngFor="let game of games"
+              class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+            >
+              <div class="panel border bg-white">
+                <div class="panel-heading">
+                  <img [src]="game.background_image" alt="Game Image" />
+                </div>
+                <div class="panel-body p-3">
+                  <h3 class="gameName">
+                    {{
+                      game.name.split(" ").length > 2
+                        ? game.name.split(" ")[0] +
+                          " " +
+                          game.name.split(" ")[1] +
+                          "..."
+                        : game.name
+                    }}
+                  </h3>
+                  <div class="platforms-container my-2">
+                    <ng-container
+                      *ngFor="
+                        let parentPlatform of game.parent_platforms;
+                        let i = index
+                      "
+                    >
+                      <span
+                        class="platform"
+                        *ngIf="parentPlatform.platform && i < 2"
+                      >
+                        <img
+                          [src]="getPlatformIcon(parentPlatform.platform.slug)"
+                          [alt]="parentPlatform.platform.name"
+                        />
+                      </span>
+                      <span
+                        class="platform"
+                        *ngIf="game.parent_platforms.length > 2 && i === 1"
+                      >
+                        <mat-icon>add</mat-icon></span
+                      >
+                    </ng-container>
+                  </div>
+                  <div class="detail rating">
+                    <span class="title">Global Rating:</span>
+                    <span class="value">{{ game.rating }}</span>
+                  </div>
+                  <div class="detail releaseDate">
+                    <span class="title">Release Date:</span>
+                    <span class="value">{{ game.released }}</span>
+                  </div>
+                  <div class="detail genres">
+                    <span class="title">Genres:</span>
+                    <span class="value">
+                      <ng-container
+                        *ngFor="let genre of game.genres; let i = index"
+                      >
+                        <ng-container *ngIf="i === 0">
+                          {{ genre.name }}
+                          <span *ngIf="game.genres.length > 1">, +</span>
+                        </ng-container>
+                      </ng-container>
+                    </span>
+                  </div>
+
+                  <div class="detail chart">
+                    <span class="title">Chart:</span>
+                    <span class="value">#{{ game.rating_top }} Top 2023</span>
+                  </div>
+                  <div
+                    class="show-more-container d-flex justify-content-between align-items-center"
+                  >
+                    <button
+                      class="btn d-flex align-items-center"
+                      (click)="incrementLike(game.id)"
+                    >
+                      <mat-icon class="me-1" style="color: blue"
+                        >thumb_up</mat-icon
+                      >
+                      <span style="color: blue">{{ game.likeCount }}</span>
+                    </button>
+                    <button
+                      class="btn d-flex align-items-center"
+                      (click)="incrementDislike(game.id)"
+                    >
+                      <mat-icon class="me-1" style="color: rgb(255, 123, 0)"
+                        >thumb_down</mat-icon
+                      >
+                      <span style="color: rgb(255, 102, 0)">{{
+                        game.dislikeCount
+                      }}</span>
+                    </button>
+                  </div>
+                  <div
+                    class="show-more-container d-flex justify-content-center"
+                  >
+                    <a [routerLink]="['/game', game.id]" class="show-more"
+                      >Show More</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Display "No games found" message if there are no games -->
+            <div *ngIf="isLoading && games.length === 0">
+              <div class="no-games-alert">
+                <p>Loading games...</p>
+              </div>
+            </div>
+            <div *ngIf="!isLoading && games.length === 0">
+              <div class="no-games-alert">
+                <p>No Game Found.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

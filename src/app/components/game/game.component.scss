@@ -1,0 +1,81 @@
+.container {
+    z-index: 1010; 
+    padding-top: 80px;
+}
+.header-flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.fixed-sidebar {
+    padding-top: 100px;   
+    }
+
+.game-title {
+    margin-right: 10px; /* Adjust as needed */
+}
+
+.header-flex-container > div {
+    display: flex;
+    gap: 10px; /* Spacing between buttons */
+}
+
+.img-fluid {
+    width: auto; 
+    height: auto; 
+    object-fit: contain; 
+    border-radius: 0; 
+    position: static; 
+}
+
+
+.img-fluid img:hover {
+    transform: scale(1.05); 
+}
+.game-info {
+    padding: 20px;
+}
+
+.game-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.ratings-section, .game-details {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.detail-title {
+    font-weight: bold;
+}
+
+.detail-value {
+    font-weight: bold;
+}
+
+.screenshot-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.screenshot-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.button-group {
+    display: flex;
+    justify-content: space-between; 
+}
