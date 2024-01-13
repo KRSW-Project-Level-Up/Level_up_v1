@@ -3,7 +3,7 @@ import { AuthService } from './../../services/auth.service';
 import { ApiService } from './../../services/api.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
 import { GameModel } from 'src/app/models/game-model';
-import { forkJoin } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +23,7 @@ export class HomeComponent implements OnInit {
   public gameMine!: GameModel;
   public searchTerm: string = '';
   isLoading: boolean = false;
+  userId: number = 0;
 
   public fullName: string = '';
   constructor(
@@ -52,6 +53,38 @@ export class HomeComponent implements OnInit {
   fetchAllGames() {
     this.isLoading = true;
 
+    // Remove sessionStorage logic if you always want fresh data
+    this.getGamesForPeriodPages().subscribe(
+      (pages: any[]) => {
+        const gameDetails = pages.flatMap((page) => page.results);
+        const ratingRequests = gameDetails.map((game) =>
+          this.api
+            .getGameRating(this.userId, game.id)
+            .pipe(map((rating: any) => ({ ...game, ...rating })))
+        );
+
+        forkJoin(ratingRequests).subscribe(
+          (gamesWithRatings) => {
+            this.allGames = gamesWithRatings;
+            this.games = [...this.allGames];
+            this.isLoading = false;
+          },
+          (error) => {
+            console.error('Error fetching game ratings', error);
+            this.isLoading = false;
+          }
+        );
+      },
+      (error) => {
+        console.error('Error fetching games', error);
+        this.isLoading = false;
+      }
+    );
+  }
+
+  /*fetchAllGames() {
+    this.isLoading = true;
+
     const storedGames = sessionStorage.getItem('allGames');
     if (storedGames) {
       this.allGames = JSON.parse(storedGames);
@@ -79,7 +112,7 @@ export class HomeComponent implements OnInit {
         }
       );
     }
-  }
+  }*/
 
   getGamesForPeriodPages() {
     const requests = [];
@@ -89,45 +122,6 @@ export class HomeComponent implements OnInit {
 
     return forkJoin(requests);
   }
-
-  /*fetchAllGames() {
-    this.isLoading = true;
-
-    const storedGames = sessionStorage.getItem('allGames');
-    if (storedGames) {
-      this.allGames = JSON.parse(storedGames);
-      this.games = [...this.allGames]; // Update 'games' for display
-    } else {
-      forkJoin({
-        gamesbyPeriod: this.api.getGamesForPeriod(),
-        lastGames: this.api.getLastGames(),
-        topGames: this.api.getLastGames(),
-      }).subscribe(
-        (results: { gamesbyPeriod: any; lastGames: any; topGames: any }) => {
-          this.allGames = [
-            ...results.gamesbyPeriod.results.map((game: any) => ({
-              ...game,
-              likeCount: 0,
-              dislikeCount: 0,
-            })),
-            ...results.lastGames.results.map((game: any) => ({
-              ...game,
-              likeCount: 0,
-              dislikeCount: 0,
-            })),
-            ...results.topGames.results.map((game: any) => ({
-              ...game,
-              likeCount: 0,
-              dislikeCount: 0,
-            })),
-          ];
-          sessionStorage.setItem('allGames', JSON.stringify(this.allGames));
-          this.games = [...this.allGames];
-          this.isLoading = false;
-        }
-      );
-    }
-  }*/
 
   getLastGames() {
     this.api.getLastGames().subscribe((data: any) => {
@@ -143,7 +137,6 @@ export class HomeComponent implements OnInit {
         dislikeCount: 0,
       }));
 
-      // Update 'games' for display
       this.games = [...this.allGames];
     });
   }
@@ -182,8 +175,34 @@ export class HomeComponent implements OnInit {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
       this.games[gameIndex].likeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
+
+      // Prepare the data to be sent
+      const dataToSend = {
+        userId: this.userId,
+        gameId: gameId,
+        likeCount: this.games[gameIndex].likeCount,
+        dislikeCount: this.games[gameIndex].dislikeCount,
+      };
+
+      // Log the data being sent
+      console.log('Sending like update:', dataToSend);
+
+      // Call the API to update the like count
+      this.api
+        .addGameRating(
+          this.userId,
+          gameId,
+          this.games[gameIndex].likeCount,
+          this.games[gameIndex].dislikeCount
+        )
+        .subscribe(
+          (response) => {
+            console.log('Like count updated:', response);
+          },
+          (error) => {
+            console.error('Error updating like count:', error);
+          }
+        );
     }
   }
 
@@ -191,13 +210,30 @@ export class HomeComponent implements OnInit {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
       this.games[gameIndex].dislikeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
-    }
-  }
+      const dataToSend = {
+        userId: this.userId,
+        gameId: gameId,
+        likeCount: this.games[gameIndex].likeCount,
+        dislikeCount: this.games[gameIndex].dislikeCount,
+      };
 
-  updateSessionStorage() {
-    sessionStorage.setItem('allGames', JSON.stringify(this.games));
+      console.log('Sending dislike update:', dataToSend);
+      this.api
+        .addGameRating(
+          this.userId,
+          gameId,
+          this.games[gameIndex].likeCount,
+          this.games[gameIndex].dislikeCount
+        )
+        .subscribe(
+          (response) => {
+            console.log('Dislike count updated:', response);
+          },
+          (error) => {
+            console.error('Error updating dislike count:', error);
+          }
+        );
+    }
   }
 
   getPlatformIcon(slug: string): string {

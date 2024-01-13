@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { GameModel } from '../models/game-model';
 
 @Injectable({
@@ -37,17 +37,75 @@ export class ApiService {
     const url = `https://api.rawg.io/api/games?key=${this.API_KEY}&page=1&page_size=80&dates=2020-01-01,2023-12-31&ordering=-added`;
     return this.http.get(url);
   }
-  geGameById(id: string) {
+  getGameById(id: string) {
     const url = `https://api.rawg.io/api/games/${id}?key=${this.API_KEY}`;
     return this.http.get(url);
   }
-  updateLikes(game: GameModel) {
-    const url = `${this.baseUrl}/games/${game.id}/likes`;
-    return this.http.post(url, game);
+
+  addToPlaylistAPI(gameId: number, userId: number) {
+    const url = `${this.baseUrl}/playlist/add`;
+    const data = {
+      gameId: gameId,
+      addedDate: new Date().toISOString(),
+      userId: userId,
+    };
+    return this.http.post(url, data);
   }
 
-  updateDislikes(game: GameModel) {
-    const url = `${this.baseUrl}/games/${game.id}/dislikes`;
-    return this.http.post(url, game);
+  addToWishlistAPI(gameId: number, userId: number) {
+    const url = `${this.baseUrl}/wishlist/add`;
+    const data = {
+      gameId: gameId,
+      addedDate: new Date().toISOString(),
+      userId: userId,
+    };
+    return this.http.post(url, data);
+  }
+
+  addGameRating(
+    userId: number,
+    gameId: number,
+    likeCount: number,
+    dislikeCount: number
+  ) {
+    const url = `${this.baseUrl}/games/rating`;
+    const data = {
+      userId: userId,
+      gameId: gameId,
+      likeCount: likeCount,
+      dislikeCount: dislikeCount,
+    };
+
+    return this.http.post(url, data);
+  }
+
+  getPlaylist(userId: number): Observable<{ playlistIds: number[] }> {
+    const url = `${this.baseUrl}/users/${userId}/playlist`;
+    return this.http.get<{ playlistIds: number[] }>(url);
+  }
+  getWishlist(userId: number): Observable<{ wishlistIds: number[] }> {
+    const url = `${this.baseUrl}/users/${userId}/playlist`;
+    return this.http.get<{ wishlistIds: number[] }>(url);
+  }
+
+  getGameRating(userId: number, gameId: number) {
+    const url = `${this.baseUrl}/games/${gameId}/rating?userId=${userId}`;
+    return this.http.get<{ likeCount: number; dislikeCount: number }>(url);
+  }
+  deleteFromWishlist(gameId: number, userId: number) {
+    const url = `${this.baseUrl}/wishlist/delete`;
+    const data = {
+      gameId: gameId,
+      userId: userId,
+    };
+    return this.http.request('delete', url, { body: data });
+  }
+  deleteFromPlaylist(gameId: number, userId: number) {
+    const url = `${this.baseUrl}/playlist/delete`;
+    const data = {
+      gameId: gameId,
+      userId: userId,
+    };
+    return this.http.request('delete', url, { body: data });
   }
 }

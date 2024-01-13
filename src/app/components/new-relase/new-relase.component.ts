@@ -16,6 +16,7 @@ export class NewRelaseComponent implements OnInit {
   public originalGames: any[] = [];
   public lastGames: any[] = [];
   public allGames: any[] = [];
+  userId: number = 0;
 
   public role!: string;
   likeCount = 0;
@@ -36,13 +37,8 @@ export class NewRelaseComponent implements OnInit {
       this.users = res;
     });
 
-    const storedLastGames = sessionStorage.getItem('lastGames');
-    if (storedLastGames) {
-      this.lastGames = JSON.parse(storedLastGames);
-      this.games = [...this.lastGames];
-    } else {
-      this.getLastGames();
-    }
+    // Fetch the last games directly
+    this.getLastGames();
 
     this.userStore.getFullNameFromStore().subscribe((val) => {
       const fullNameFromToken = this.auth.getfullNameFromToken();
@@ -70,11 +66,8 @@ export class NewRelaseComponent implements OnInit {
             likeCount: 0,
             dislikeCount: 0,
           }));
-
-        sessionStorage.setItem('lastGames', JSON.stringify(sortedGames));
-
-        this.updateAllGamesList(sortedGames);
-
+        this.games = sortedGames;
+        this.originalGames = sortedGames;
         this.isLoading = false;
       },
       (error) => {
@@ -84,39 +77,43 @@ export class NewRelaseComponent implements OnInit {
     );
   }
 
-  updateAllGamesList(newGames: any[]) {
-    const storedAllGames = sessionStorage.getItem('allGames');
-    const allGames = storedAllGames ? JSON.parse(storedAllGames) : [];
-
-    newGames.forEach((game) => {
-      if (!allGames.some((g: { id: any }) => g.id === game.id)) {
-        allGames.push(game);
-      }
-    });
-
-    // Save the updated allGames list back to session storage
-    sessionStorage.setItem('allGames', JSON.stringify(allGames));
-
-    // Update the component's allGames property
-    this.allGames = allGames;
-  }
-
   filterGames() {
     if (this.searchTerm) {
-      this.games = this.allGames.filter((game) =>
+      this.games = this.originalGames.filter((game) =>
         game.name.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     } else {
-      this.games = [...this.allGames];
+      this.games = [...this.originalGames];
     }
   }
-
   incrementLike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
       this.games[gameIndex].likeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
+      const dataToSend = {
+        userId: this.userId,
+        gameId: gameId,
+        likeCount: this.games[gameIndex].likeCount,
+        dislikeCount: this.games[gameIndex].dislikeCount,
+      };
+
+      console.log('Sending like update:', dataToSend);
+
+      this.api
+        .addGameRating(
+          this.userId,
+          gameId,
+          this.games[gameIndex].likeCount,
+          this.games[gameIndex].dislikeCount
+        )
+        .subscribe(
+          (response) => {
+            console.log('Like count updated:', response);
+          },
+          (error) => {
+            console.error('Error updating like count:', error);
+          }
+        );
     }
   }
 
@@ -124,14 +121,32 @@ export class NewRelaseComponent implements OnInit {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
       this.games[gameIndex].dislikeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
+      const dataToSend = {
+        userId: this.userId,
+        gameId: gameId,
+        likeCount: this.games[gameIndex].likeCount,
+        dislikeCount: this.games[gameIndex].dislikeCount,
+      };
+
+      console.log('Sending dislike update:', dataToSend);
+      this.api
+        .addGameRating(
+          this.userId,
+          gameId,
+          this.games[gameIndex].likeCount,
+          this.games[gameIndex].dislikeCount
+        )
+        .subscribe(
+          (response) => {
+            console.log('Dislike count updated:', response);
+          },
+          (error) => {
+            console.error('Error updating dislike count:', error);
+          }
+        );
     }
   }
 
-  updateSessionStorage() {
-    sessionStorage.setItem('allGames', JSON.stringify(this.games));
-  }
   getPlatformIcon(slug: string): string {
     const iconsMap: { [key: string]: string } = {
       pc: 'windows-svgrepo-com.svg',

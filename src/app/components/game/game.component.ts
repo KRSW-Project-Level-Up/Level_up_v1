@@ -16,6 +16,7 @@ export class GameComponent implements OnInit {
   public playlist: any[] = [];
   public wishlist: any[] = [];
   public reviewText: string = '';
+  userId: number = 0;
 
   constructor(
     private router: Router,
@@ -70,38 +71,63 @@ export class GameComponent implements OnInit {
     });
   }
 
-  addToPlaylist(gameId: number) {
-    let storedPlaylist = sessionStorage.getItem('playlist');
-    let playlist = storedPlaylist ? JSON.parse(storedPlaylist) : [];
-    if (!playlist.includes(gameId)) {
-      playlist.push(gameId);
-      sessionStorage.setItem('playlist', JSON.stringify(playlist));
-    }
-    this.toast.success({
-      detail: 'SUCCESS',
-      summary: 'Adding successful!',
-      duration: 3000,
-    });
+  addToPlaylist(gameId: number, userId: number) {
+    const dataToSend = {
+      gameId: gameId,
+      userId: userId,
+      addedDate: new Date().toISOString(),
+    };
 
-    console.log('Updated playlist:', playlist);
+    console.log('Sending to playlist:', dataToSend);
+
+    this.api.addToPlaylistAPI(gameId, userId).subscribe(
+      (response) => {
+        console.log('Updated playlist:', response);
+        this.toast.success({
+          detail: 'SUCCESS',
+          summary: 'Game added to playlist!',
+          duration: 3000,
+        });
+      },
+      (error) => {
+        this.toast.error({
+          detail: 'ERROR',
+          summary: 'Failed to add game to playlist.',
+          duration: 3000,
+        });
+        console.error('Error:', error);
+      }
+    );
   }
 
-  addToWishlist() {
-    let storedWishlist = sessionStorage.getItem('wishlist');
-    let wishlist = storedWishlist ? JSON.parse(storedWishlist) : [];
+  addToWishlist(gameId: number, userId: number) {
+    const dataToSend = {
+      gameId: gameId,
+      userId: userId,
+      addedDate: new Date().toISOString(),
+    };
 
-    if (!wishlist.includes(this.game.id)) {
-      wishlist.push(this.game.id);
-      sessionStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }
+    // Log the data being sent
+    console.log('Sending to wishlist:', dataToSend);
 
-    this.toast.success({
-      detail: 'SUCCESS',
-      summary: 'Adding successful!',
-      duration: 3000,
-    });
-
-    console.log('Updated wishlist:', wishlist);
+    this.api.addToWishlistAPI(gameId, userId).subscribe(
+      (response) => {
+        console.log('Updated wishlist:', response);
+        this.toast.success({
+          detail: 'SUCCESS',
+          summary: 'Game added to wishlist!',
+          duration: 3000,
+        });
+      },
+      (error) => {
+        this.toast.error({
+          detail: 'ERROR',
+          summary: 'Failed to add game to wishlist.',
+          duration: 3000,
+        });
+        console.error('Error:', error);
+      }
+    );
   }
 
   logout() {

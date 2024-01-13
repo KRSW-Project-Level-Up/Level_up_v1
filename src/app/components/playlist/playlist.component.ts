@@ -11,6 +11,7 @@ import { UserStoreService } from 'src/app/services/user-store.service';
 export class PlaylistComponent implements OnInit {
   public playlist: any[] = [];
   public games: any[] = [];
+  userId: number = 0;
 
   constructor(
     private api: ApiService,
@@ -19,29 +20,47 @@ export class PlaylistComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadGames();
-    this.loadPlaylist();
+    this.loadPlaylist(this.userId);
   }
 
-  loadPlaylist() {
-    const storedPlaylist = sessionStorage.getItem('playlist');
-    if (storedPlaylist) {
-      const playlistIds: number[] = JSON.parse(storedPlaylist);
-      const uniquePlaylistIds = new Set<number>(playlistIds); // Specify the type
-
-      this.playlist = Array.from(uniquePlaylistIds)
-        .map((id) => this.games.find((game: any) => game.id === id))
-        .filter((game: any) => game !== undefined);
-
-      console.log('Unique playlist with game details:', this.playlist);
-    }
+  loadPlaylist(userId: number) {
+    this.api.getPlaylist(userId).subscribe(
+      (response) => {
+        const playlistIds = response.playlistIds;
+        this.fetchGamesDetails(playlistIds);
+      },
+      (error) => {
+        console.error('Error fetching playlist', error);
+      }
+    );
   }
 
-  loadGames() {
-    const storedGames = sessionStorage.getItem('allGames');
-    if (storedGames) {
-      this.games = JSON.parse(storedGames);
-    }
+  fetchGamesDetails(gameIds: number[]) {
+    const gamesDetailsPromises = gameIds.map((gameId) =>
+      this.api.getGameById(gameId.toString()).toPromise()
+    );
+
+    Promise.all(gamesDetailsPromises)
+      .then((gamesDetails) => {
+        this.playlist = gamesDetails;
+        this.games = gamesDetails;
+        console.log('Playlist with game details:', this.playlist);
+      })
+      .catch((error) => {
+        console.error('Error fetching games details', error);
+      });
+  }
+  // add button to delete from playlist in playlist.component.html
+  deleteFromPlaylist(gameId: number) {
+    this.api.deleteFromPlaylist(this.userId, gameId).subscribe(
+      (response) => {
+        console.log('Deleted from playlist', response);
+        this.loadPlaylist(this.userId);
+      },
+      (error) => {
+        console.error('Error deleting from playlist', error);
+      }
+    );
   }
 
   logout() {
