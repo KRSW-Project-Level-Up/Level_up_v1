@@ -60,7 +60,7 @@ export class RecommendationComponent implements OnInit {
       this.isLoading = false;
     } else {
       uniqueGameIds.forEach((gameId) => {
-        this.api.geGameById(gameId).subscribe((res) => {
+        this.api.getGameById(gameId).subscribe((res) => {
           this.detailedGames.push(res);
           requestsRemaining--;
           if (requestsRemaining === 0) {

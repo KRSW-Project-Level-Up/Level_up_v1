@@ -17,33 +17,50 @@ export class WishlistComponent implements OnInit {
 
   public wishlist: any[] = [];
   public games: any[] = [];
+  userId: number = 0;
 
   ngOnInit(): void {
-    this.loadGames();
-    this.loadWishlist();
+    this.loadWishlist(this.userId);
   }
 
-  loadWishlist() {
-    const storedPlaylist = sessionStorage.getItem('wishlist');
-    if (storedPlaylist) {
-      const playlistIds: number[] = JSON.parse(storedPlaylist);
-      const uniquePlaylistIds = new Set<number>(playlistIds); // Specify the type
-
-      this.wishlist = Array.from(uniquePlaylistIds)
-        .map((id) => this.games.find((game: any) => game.id === id))
-        .filter((game: any) => game !== undefined);
-
-      console.log('Unique wishlist with game details:', this.wishlist);
-    }
+  loadWishlist(userId: number) {
+    this.api.getWishlist(userId).subscribe(
+      (response) => {
+        const wishlistIds = response.wishlistIds;
+        this.fetchGamesDetails(wishlistIds);
+      },
+      (error) => {
+        console.error('Error fetching playlist', error);
+      }
+    );
   }
+  fetchGamesDetails(gameIds: number[]) {
+    const gamesDetailsPromises = gameIds.map((gameId) =>
+      this.api.getGameById(gameId.toString()).toPromise()
+    );
 
-  loadGames() {
-    const storedGames = sessionStorage.getItem('allGames');
-    if (storedGames) {
-      this.games = JSON.parse(storedGames);
-    }
+    Promise.all(gamesDetailsPromises)
+      .then((gamesDetails) => {
+        this.wishlist = gamesDetails;
+        this.games = gamesDetails;
+        console.log('Playlist with game details:', this.wishlist);
+      })
+      .catch((error) => {
+        console.error('Error fetching games details', error);
+      });
   }
-
+  // add button to delete from wishlist in wishlist.component.html
+  deleteFromWishlist(gameId: number) {
+    this.api.deleteFromWishlist(this.userId, gameId).subscribe(
+      (response) => {
+        console.log('Deleted from wishlist', response);
+        this.loadWishlist(this.userId);
+      },
+      (error) => {
+        console.error('Error deleting from wishlist', error);
+      }
+    );
+  }
   logout() {
     this.auth.signOut();
   }

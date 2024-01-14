@@ -54,12 +54,15 @@
                   <div class="header-flex-container">
                     <h2 class="game-title">{{ game.name }}</h2>
                     <div>
-                      <button class="btn btn-primary" (click)="addToWishlist()">
+                      <button
+                        class="btn btn-primary"
+                        (click)="addToWishlist(game.id, userId)"
+                      >
                         Add to Wishlist
                       </button>
                       <button
                         class="btn btn-primary"
-                        (click)="addToPlaylist(game.id)"
+                        (click)="addToPlaylist(game.id, userId)"
                       >
                         Add to Playlist
                       </button>
