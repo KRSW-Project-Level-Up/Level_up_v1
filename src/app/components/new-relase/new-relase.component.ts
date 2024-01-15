@@ -86,7 +86,7 @@ export class NewRelaseComponent implements OnInit {
       this.games = [...this.originalGames];
     }
   }
-  incrementLike(gameId: number) {
+  /*incrementLike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
       this.games[gameIndex].likeCount++;
@@ -145,6 +145,27 @@ export class NewRelaseComponent implements OnInit {
           }
         );
     }
+  }*/
+  incrementLike(gameId: number) {
+    this.api.addGameRating(this.userId, gameId, 'like').subscribe(
+      (response) => {
+        console.log('Like count updated:', response);
+      },
+      (error) => {
+        console.error('Error updating like count:', error);
+      }
+    );
+  }
+
+  incrementDislike(gameId: number) {
+    this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
+      (response) => {
+        console.log('Dislike count updated:', response);
+      },
+      (error) => {
+        console.error('Error updating dislike count:', error);
+      }
+    );
   }
 
   getPlatformIcon(slug: string): string {

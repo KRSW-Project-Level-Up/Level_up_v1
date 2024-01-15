@@ -2,27 +2,35 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserStoreService {
-private fullName$ = new BehaviorSubject<string>("");
-private role$ = new BehaviorSubject<string>("");
+  private fullName$ = new BehaviorSubject<string>('');
+  private role$ = new BehaviorSubject<string>('');
+  private userId$ = new BehaviorSubject<string>('');
 
-constructor() { }
+  constructor() {}
+  public getUserIdFromStore() {
+    return this.userId$.asObservable();
+  }
 
-  public getRoleFromStore(){
+  public setUSerIdForStore(userId: string) {
+    this.userId$.next(userId);
+  }
+
+  public getRoleFromStore() {
     return this.role$.asObservable();
   }
 
-  public setRoleForStore(role:string){
+  public setRoleForStore(role: string) {
     this.role$.next(role);
   }
 
-  public getFullNameFromStore(){
+  public getFullNameFromStore() {
     return this.fullName$.asObservable();
   }
 
-  public setFullNameForStore(fullname:string){
-    this.fullName$.next(fullname)
+  public setFullNameForStore(fullname: string) {
+    this.fullName$.next(fullname);
   }
 }

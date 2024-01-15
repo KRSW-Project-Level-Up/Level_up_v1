@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
   public gameMine!: GameModel;
   public searchTerm: string = '';
   isLoading: boolean = false;
-  userId: number = 0;
+  userId: any;
 
   public fullName: string = '';
   constructor(
@@ -48,9 +48,14 @@ export class HomeComponent implements OnInit {
       const roleFromToken = this.auth.getRoleFromToken();
       this.role = val || roleFromToken;
     });
+    this.userStore.getUserIdFromStore().subscribe((val) => {
+      const userId = this.auth.getUserIdFromToken();
+      this.userId = userId;
+      console.log('user id', this.userId);
+    });
   }
 
-  fetchAllGames() {
+  /*fetchAllGames() {
     this.isLoading = true;
 
     // Remove sessionStorage logic if you always want fresh data
@@ -80,9 +85,9 @@ export class HomeComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }
+  }*/
 
-  /*fetchAllGames() {
+  fetchAllGames() {
     this.isLoading = true;
 
     const storedGames = sessionStorage.getItem('allGames');
@@ -112,14 +117,14 @@ export class HomeComponent implements OnInit {
         }
       );
     }
-  }*/
+  }
 
   getGamesForPeriodPages() {
     const requests = [];
     for (let page = 2; page <= 4; page++) {
       requests.push(this.api.getGamesForPeriodPage(page));
     }
-
+    console.log('this.is requests', requests);
     return forkJoin(requests);
   }
 
@@ -174,65 +179,43 @@ export class HomeComponent implements OnInit {
   incrementLike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      this.games[gameIndex].likeCount++;
+      console.log('Sending like update for gameId:', gameId);
 
-      // Prepare the data to be sent
-      const dataToSend = {
-        userId: this.userId,
-        gameId: gameId,
-        likeCount: this.games[gameIndex].likeCount,
-        dislikeCount: this.games[gameIndex].dislikeCount,
-      };
+      this.api.addGameRating(this.userId, gameId, 'like').subscribe(
+        (response: any) => {
+          console.log('Like count updated:', response);
+          // Update the game's like count in the frontend state
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+          this.games = [...this.games]; // Create a new array to trigger change detection
 
-      // Log the data being sent
-      console.log('Sending like update:', dataToSend);
-
-      // Call the API to update the like count
-      this.api
-        .addGameRating(
-          this.userId,
-          gameId,
-          this.games[gameIndex].likeCount,
-          this.games[gameIndex].dislikeCount
-        )
-        .subscribe(
-          (response) => {
-            console.log('Like count updated:', response);
-          },
-          (error) => {
-            console.error('Error updating like count:', error);
-          }
-        );
+          console.log('this.games[gameIndex]', this.games[gameIndex]);
+        },
+        (error) => {
+          console.error('Error updating like count:', error);
+          // Optionally handle error (e.g., revert optimistic UI update)
+        }
+      );
     }
   }
 
   incrementDislike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      this.games[gameIndex].dislikeCount++;
-      const dataToSend = {
-        userId: this.userId,
-        gameId: gameId,
-        likeCount: this.games[gameIndex].likeCount,
-        dislikeCount: this.games[gameIndex].dislikeCount,
-      };
+      console.log('Sending dislike update for gameId:', gameId);
 
-      console.log('Sending dislike update:', dataToSend);
-      this.api
-        .addGameRating(
-          this.userId,
-          gameId,
-          this.games[gameIndex].likeCount,
-          this.games[gameIndex].dislikeCount
-        )
-        .subscribe(
-          (response) => {
-            console.log('Dislike count updated:', response);
-          },
-          (error) => {
-            console.error('Error updating dislike count:', error);
-          }
-        );
+      this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
+        (response: any) => {
+          console.log('Dislike count updated:', response);
+          // Update the game's dislike count in the frontend state
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+        },
+        (error) => {
+          console.error('Error updating dislike count:', error);
+          // Optionally handle error (e.g., revert optimistic UI update)
+        }
+      );
     }
   }
 

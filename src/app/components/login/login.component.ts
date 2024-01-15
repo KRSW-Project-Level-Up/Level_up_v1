@@ -26,7 +26,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required],
+      email: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
@@ -44,7 +44,8 @@ export class LoginComponent implements OnInit {
       // Make an API call for authentication
       this.auth.signIn(loginObj).subscribe({
         next: (response) => {
-          // Handle the successful response here
+          //this.auth.storeToken(response.token);
+          console.log(response);
           this.toast.success({
             detail: 'SUCCESS',
             summary: 'Login Successful',
@@ -56,6 +57,7 @@ export class LoginComponent implements OnInit {
             response.firstName + ' ' + response.lastName
           );
           this.userStore.setRoleForStore(response.role);
+          this.userStore.setUSerIdForStore(response.user_id);
 
           this.router.navigate(['home']);
         },
