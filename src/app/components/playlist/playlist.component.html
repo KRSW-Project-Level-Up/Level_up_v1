@@ -45,8 +45,10 @@
                       <th>Play Time Hr</th>
                       <th>Like</th>
                       <th>Dislike</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     <tr *ngFor="let game of playlist">
                       <td>
@@ -57,6 +59,12 @@
                       <td>{{ game.playtime }}</td>
                       <td>{{ game.likeCount }}</td>
                       <td>{{ game.dislikeCount }}</td>
+                      <td>
+                        <i
+                          class="fa fa-trash"
+                          (click)="deleteFromPlaylist(game.id)"
+                        ></i>
+                      </td>
                     </tr>
                   </tbody>
                 </table>

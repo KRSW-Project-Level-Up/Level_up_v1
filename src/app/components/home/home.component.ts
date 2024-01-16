@@ -24,6 +24,7 @@ export class HomeComponent implements OnInit {
   public searchTerm: string = '';
   isLoading: boolean = false;
   userId: any;
+  currentUser: any;
 
   public fullName: string = '';
   constructor(
@@ -39,19 +40,11 @@ export class HomeComponent implements OnInit {
 
     this.fetchAllGames();
 
-    this.userStore.getFullNameFromStore().subscribe((val) => {
-      const fullNameFromToken = this.auth.getfullNameFromToken();
-      this.fullName = val || fullNameFromToken;
-    });
-
-    this.userStore.getRoleFromStore().subscribe((val) => {
-      const roleFromToken = this.auth.getRoleFromToken();
-      this.role = val || roleFromToken;
-    });
-    this.userStore.getUserIdFromStore().subscribe((val) => {
-      const userId = this.auth.getUserIdFromToken();
-      this.userId = userId;
-      console.log('user id', this.userId);
+    this.userStore.getUserFromStore().subscribe((val) => {
+      const user = this.auth.getUserFromToken();
+      this.currentUser = user;
+      this.userId = this.currentUser.id;
+      console.log('userNew', this.userId);
     });
   }
 

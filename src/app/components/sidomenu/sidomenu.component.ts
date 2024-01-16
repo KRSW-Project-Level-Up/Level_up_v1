@@ -57,15 +57,10 @@ export class SidomenuComponent implements OnInit {
     console.log(this.originalGames)
   });*/
 
-    this.userStore.getFullNameFromStore().subscribe((val) => {
-      const fullNameFromToken = this.auth.getfullNameFromToken();
-      this.fullName = val || fullNameFromToken;
-    });
-
-    this.userStore.getRoleFromStore().subscribe((val) => {
+    /*this.userStore.getRoleFromStore().subscribe((val) => {
       const roleFromToken = this.auth.getRoleFromToken();
       this.role = val || roleFromToken;
-    });
+    });*/
   }
   /*
 fetchAllGames() {

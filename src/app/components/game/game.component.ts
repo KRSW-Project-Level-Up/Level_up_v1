@@ -17,16 +17,24 @@ export class GameComponent implements OnInit {
   public wishlist: any[] = [];
   public reviewText: string = '';
   userId: number = 0;
+  public currentUser: any;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private api: ApiService,
     private auth: AuthService,
-    private toast: NgToastService
+    private toast: NgToastService,
+    private userStore: UserStoreService
   ) {}
 
   ngOnInit(): void {
+    this.userStore.getUserFromStore().subscribe((val) => {
+      const user = this.auth.getUserFromToken();
+      this.currentUser = user;
+      this.userId = this.currentUser.id;
+      console.log('userNew', this.userId);
+    });
     this.route.paramMap.subscribe((params) => {
       const gameIdParam = params.get('id');
       if (gameIdParam) {
@@ -73,14 +81,13 @@ export class GameComponent implements OnInit {
 
   addToPlaylist(gameId: number, userId: number) {
     const dataToSend = {
-      gameId: gameId,
-      userId: userId,
-      addedDate: new Date().toISOString(),
+      user_id: 1,
+      game_id: gameId,
     };
 
     console.log('Sending to playlist:', dataToSend);
 
-    this.api.addToPlaylistAPI(gameId, userId).subscribe(
+    this.api.addToPlaylist(gameId, userId).subscribe(
       (response) => {
         console.log('Updated playlist:', response);
         this.toast.success({
@@ -88,11 +95,15 @@ export class GameComponent implements OnInit {
           summary: 'Game added to playlist!',
           duration: 3000,
         });
+        this.api.getAllPlaylist(userId).subscribe((data: any) => {
+          this.playlist = data;
+          console.log('Playlist:', this.playlist);
+        });
       },
       (error) => {
         this.toast.error({
           detail: 'ERROR',
-          summary: 'Failed to add game to playlist.',
+          summary: error.error.message,
           duration: 3000,
         });
         console.error('Error:', error);
@@ -102,15 +113,12 @@ export class GameComponent implements OnInit {
 
   addToWishlist(gameId: number, userId: number) {
     const dataToSend = {
-      gameId: gameId,
-      userId: userId,
-      addedDate: new Date().toISOString(),
+      user_id: userId,
+      game_id: gameId,
     };
-
-    // Log the data being sent
     console.log('Sending to wishlist:', dataToSend);
 
-    this.api.addToWishlistAPI(gameId, userId).subscribe(
+    this.api.addToWishlist(gameId, userId).subscribe(
       (response) => {
         console.log('Updated wishlist:', response);
         this.toast.success({
@@ -118,11 +126,15 @@ export class GameComponent implements OnInit {
           summary: 'Game added to wishlist!',
           duration: 3000,
         });
+        this.api.getAllWishlist(userId).subscribe((data: any) => {
+          this.wishlist = data;
+          console.log('Wishlist:', this.wishlist);
+        });
       },
       (error) => {
         this.toast.error({
           detail: 'ERROR',
-          summary: 'Failed to add game to wishlist.',
+          summary: error.error.message,
           duration: 3000,
         });
         console.error('Error:', error);

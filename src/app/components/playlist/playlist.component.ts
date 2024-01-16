@@ -12,6 +12,7 @@ export class PlaylistComponent implements OnInit {
   public playlist: any[] = [];
   public games: any[] = [];
   userId: number = 0;
+  currentUser: any;
 
   constructor(
     private api: ApiService,
@@ -20,14 +21,32 @@ export class PlaylistComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadPlaylist(this.userId);
+    this.userStore.getUserFromStore().subscribe((val) => {
+      const user = this.auth.getUserFromToken();
+      this.currentUser = user;
+      this.userId = this.currentUser.id;
+      console.log('userNew', this.userId);
+    });
   }
 
   loadPlaylist(userId: number) {
-    this.api.getPlaylist(userId).subscribe(
+    this.api.getAllPlaylist(userId).subscribe(
       (response) => {
-        const playlistIds = response.playlistIds;
-        this.fetchGamesDetails(playlistIds);
+        // Access the playlist array from the response object
+        const playlistArray = (response as any).playlist;
+
+        // Ensure that playlistArray is defined and is an array
+        if (Array.isArray(playlistArray)) {
+          const uniqueGameIds = new Set(
+            playlistArray.map((item) => item.game_id)
+          );
+          const playlistIds = Array.from(uniqueGameIds);
+
+          this.fetchGamesDetails(playlistIds);
+          console.log('Unique Playlist IDs:', playlistIds);
+        } else {
+          console.error('Invalid response structure:', response);
+        }
       },
       (error) => {
         console.error('Error fetching playlist', error);

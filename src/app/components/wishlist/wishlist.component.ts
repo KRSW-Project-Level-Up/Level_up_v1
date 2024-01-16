@@ -18,16 +18,33 @@ export class WishlistComponent implements OnInit {
   public wishlist: any[] = [];
   public games: any[] = [];
   userId: number = 0;
+  currentUser: any;
 
   ngOnInit(): void {
+    this.userStore.getUserFromStore().subscribe((val) => {
+      const user = this.auth.getUserFromToken();
+      this.currentUser = user;
+      this.userId = this.currentUser.id;
+      console.log('userNew', this.userId);
+    });
     this.loadWishlist(this.userId);
   }
 
   loadWishlist(userId: number) {
-    this.api.getWishlist(userId).subscribe(
+    this.api.getAllWishlist(userId).subscribe(
       (response) => {
-        const wishlistIds = response.wishlistIds;
-        this.fetchGamesDetails(wishlistIds);
+        const wishlistArray = (response as any).wishlist;
+        if (Array.isArray(wishlistArray)) {
+          const uniqueGameIds = new Set(
+            wishlistArray.map((item) => item.game_id)
+          );
+          const wishlistIds = Array.from(uniqueGameIds);
+
+          this.fetchGamesDetails(wishlistIds);
+          console.log('Unique Playlist IDs:', wishlistIds);
+        } else {
+          console.error('Invalid response structure:', response);
+        }
       },
       (error) => {
         console.error('Error fetching playlist', error);
@@ -49,7 +66,6 @@ export class WishlistComponent implements OnInit {
         console.error('Error fetching games details', error);
       });
   }
-  // add button to delete from wishlist in wishlist.component.html
   deleteFromWishlist(gameId: number) {
     this.api.deleteFromWishlist(this.userId, gameId).subscribe(
       (response) => {

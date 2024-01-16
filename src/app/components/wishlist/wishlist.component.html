@@ -48,8 +48,10 @@
                       <th>Play Time Hr</th>
                       <th>Like</th>
                       <th>Dislike</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     <tr *ngFor="let game of wishlist">
                       <td>
@@ -60,6 +62,13 @@
                       <td>{{ game.playtime }}</td>
                       <td>{{ game.likeCount }}</td>
                       <td>{{ game.dislikeCount }}</td>
+                      <td>
+                        <!-- or use an icon if you have an icon library -->
+                        <i
+                          class="fa fa-trash"
+                          (click)="deleteFromWishlist(game.id)"
+                        ></i>
+                      </td>
                     </tr>
                   </tbody>
                 </table>

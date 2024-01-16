@@ -39,16 +39,6 @@ export class NewRelaseComponent implements OnInit {
 
     // Fetch the last games directly
     this.getLastGames();
-
-    this.userStore.getFullNameFromStore().subscribe((val) => {
-      const fullNameFromToken = this.auth.getfullNameFromToken();
-      this.fullName = val || fullNameFromToken;
-    });
-
-    this.userStore.getRoleFromStore().subscribe((val) => {
-      const roleFromToken = this.auth.getRoleFromToken();
-      this.role = val || roleFromToken;
-    });
   }
 
   getLastGames() {

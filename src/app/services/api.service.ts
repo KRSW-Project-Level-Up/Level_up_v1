@@ -42,24 +42,31 @@ export class ApiService {
     return this.http.get(url);
   }
 
-  addToPlaylistAPI(gameId: number, userId: number) {
-    const url = `${this.baseUrl}addtoplaylist`;
+  addToPlaylist(gameId: number, userId: number) {
+    const url = 'http://127.0.0.1:5000/addtoplaylist';
     const data = {
-      gameId: gameId,
-      addedDate: new Date().toISOString(),
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
     return this.http.post(url, data);
   }
 
-  addToWishlistAPI(gameId: number, userId: number) {
-    const url = `${this.baseUrl}addtowishlist`;
+  addToWishlist(gameId: number, userId: number) {
+    const url = 'http://127.0.0.1:5000/addtowishlist';
     const data = {
-      gameId: gameId,
-      addedDate: new Date().toISOString(),
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
     return this.http.post(url, data);
+  }
+  getAllPlaylist(userId: number): Observable<any[]> {
+    const url = `${this.baseUrl}getallplaylist/${userId}`;
+    return this.http.get<any[]>(url);
+  }
+
+  getAllWishlist(userId: number): Observable<any[]> {
+    const url = `${this.baseUrl}getallwishlist/${userId}`;
+    return this.http.get<any[]>(url);
   }
 
   addGameRating(userId: number, gameId: number, action: string) {
@@ -90,20 +97,21 @@ export class ApiService {
     const url = `${this.baseUrl}games/${gameId}/rating?userId=${userId}`;
     return this.http.get<{ likeCount: number; dislikeCount: number }>(url);
   }
-  deleteFromWishlist(gameId: number, userId: number) {
-    const url = `${this.baseUrl}deletefromwishlist`;
+  deleteFromWishlist(userId: number, gameId: number) {
+    const url = 'http://127.0.0.1:5000/deletefromwishlist';
     const data = {
-      gameId: gameId,
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
-    return this.http.request('delete', url, { body: data });
+    console.log('Sending to wishlist:', data);
+    return this.http.post(url, data);
   }
-  deleteFromPlaylist(gameId: number, userId: number) {
-    const url = `${this.baseUrl}deletefromplaylis`;
+  deleteFromPlaylist(userId: number, gameId: number) {
+    const url = 'http://127.0.0.1:5000/deletefromplaylist';
     const data = {
-      gameId: gameId,
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
-    return this.http.request('delete', url, { body: data });
+    return this.http.post(url, data);
   }
 }
