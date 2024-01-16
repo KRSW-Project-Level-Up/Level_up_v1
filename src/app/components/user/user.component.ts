@@ -34,6 +34,7 @@ export class UserComponent implements OnInit {
 
       if (this.currentUser) {
         this.signUpForm.patchValue({
+          user_id: this.currentUser.user_id,
           firstName: this.currentUser.firstName,
           lastName: this.currentUser.lastName,
           userName: this.currentUser.username,
@@ -49,6 +50,7 @@ export class UserComponent implements OnInit {
 
   private initializeForm(): void {
     this.signUpForm = this.fb.group({
+      user_id: [this.userId],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       userName: ['', Validators.required],
@@ -61,14 +63,16 @@ export class UserComponent implements OnInit {
   onSubmit() {
     if (this.signUpForm.valid) {
       console.log(this.signUpForm.value);
+
+      // Prepare the object to be sent to the backend
       let signUpObj = {
         userInfo: {
           ...this.signUpForm.value,
-          role: this.currentUser.role, // Assuming role is part of the user information
-          token: this.currentUser.token, // Assuming token is part of the user information
+          // Assuming the token is not required to be sent for updating user info
         },
         sessionData: {}, // Additional session data if needed
       };
+
       // Make an API call for updating user information
       this.auth.updateUserInfo(signUpObj.userInfo).subscribe({
         next: (response) => {
@@ -79,8 +83,17 @@ export class UserComponent implements OnInit {
             duration: 5000,
           });
 
-          // Consider what should happen after successful update
-          // For instance, you might want to navigate to a profile page
+          // If the server responds with a new token, store it
+          if (response.token) {
+            this.auth.storeToken(response.token);
+          }
+
+          // Refresh user information
+          this.currentUser = this.auth.getUserFromToken();
+          this.updateFormWithCurrentUser();
+
+          // Navigate to the home page or any other page as required
+          this.router.navigate(['/home']);
         },
         error: (error) => {
           console.log(error);
@@ -96,6 +109,24 @@ export class UserComponent implements OnInit {
     }
   }
 
+  private updateFormWithCurrentUser() {
+    this.signUpForm.patchValue({
+      user_id: this.currentUser.user_id,
+      firstName: this.currentUser.firstName,
+      lastName: this.currentUser.lastName,
+      userName: this.currentUser.username,
+      email: this.currentUser.email,
+      age: this.currentUser.age,
+      nationality: this.currentUser.nationality,
+    });
+
+    // If the email should remain disabled after update
+    this.signUpForm.get('email')?.disable();
+  }
+
+  cancel(): void {
+    this.router.navigate(['/home']);
+  }
   logout() {
     this.auth.signOut();
   }

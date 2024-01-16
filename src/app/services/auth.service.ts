@@ -7,7 +7,7 @@ import { tap } from 'rxjs';
 
 export class UserModel {
   constructor(
-    public id: number = 0,
+    public user_id: number = 0,
     public firstName: string = '',
     public lastName: string = '',
     public email: string = '',
@@ -17,7 +17,7 @@ export class UserModel {
   ) {}
 
   updateFromTokenPayload(payload: any): void {
-    this.id = payload?.id;
+    this.user_id = payload?.user_id;
     this.firstName = payload?.firstName;
     this.lastName = payload?.lastName;
     this.email = payload?.email;
@@ -69,9 +69,10 @@ export class AuthService {
   }
   getUserFromToken(): UserModel {
     const payload = this.decodedToken();
+    console.log('this is payload', payload);
     if (payload) {
       return new UserModel(
-        payload.id,
+        payload.user_id,
         payload.firstName,
         payload.lastName,
         payload.email,
@@ -83,8 +84,18 @@ export class AuthService {
       return new UserModel();
     }
   }
-  updateUserInfo(userObj: any) {
+  /* updateUserInfo(userObj: any) {
     return this.http.post<any>(`${this.baseUrl}updateuserinfo`, userObj);
+  }*/
+
+  updateUserInfo(userObj: any) {
+    return this.http.put<any>(`${this.baseUrl}updateuserinfo`, userObj).pipe(
+      tap((response) => {
+        if (response && response.token) {
+          this.storeToken(response.token); // Store the new token
+        }
+      })
+    );
   }
 
   signOut() {

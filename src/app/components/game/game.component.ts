@@ -32,7 +32,7 @@ export class GameComponent implements OnInit {
     this.userStore.getUserFromStore().subscribe((val) => {
       const user = this.auth.getUserFromToken();
       this.currentUser = user;
-      this.userId = this.currentUser.id;
+      this.userId = this.currentUser.user_id;
       console.log('userNew', this.userId);
     });
     this.route.paramMap.subscribe((params) => {

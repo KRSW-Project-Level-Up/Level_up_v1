@@ -24,9 +24,10 @@ export class PlaylistComponent implements OnInit {
     this.userStore.getUserFromStore().subscribe((val) => {
       const user = this.auth.getUserFromToken();
       this.currentUser = user;
-      this.userId = this.currentUser.id;
-      console.log('userNew', this.userId);
+      this.userId = this.currentUser.user_id;
+      console.log('userNew wishlist', this.currentUser);
     });
+    this.loadPlaylist(this.userId);
   }
 
   loadPlaylist(userId: number) {

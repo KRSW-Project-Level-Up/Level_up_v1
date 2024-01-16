@@ -193,8 +193,12 @@
                   >*Nationality is required*</small
                 >
                 <div class="button-group">
-                  <button class="btn btn-primary mt-2">Save</button>
-                  <button class="btn btn-danger mt-2">Cancel</button>
+                  <button class="btn btn-primary mt-2" type="submit">
+                    Save
+                  </button>
+                  <button class="btn btn-danger mt-2" (click)="cancel()">
+                    Cancel
+                  </button>
                 </div>
               </form>
             </div>
