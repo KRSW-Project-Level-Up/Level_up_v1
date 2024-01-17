@@ -39,7 +39,7 @@ export class PlaylistComponent implements OnInit {
     this.api.getAllPlaylist(userId).subscribe(
       (response) => {
         this.playlistArray = (response as any).playlist;
-        this.likeCount; // = playlistArray.filter((item) => item.like === true).length;
+        this.likeCount;
         console.log('playlistArray', this.playlistArray);
         if (Array.isArray(this.playlistArray)) {
           const uniqueGameIds = new Set(
@@ -88,7 +88,6 @@ export class PlaylistComponent implements OnInit {
       });
   }
 
-  // add button to delete from playlist in playlist.component.html
   deleteFromPlaylist(gameId: number) {
     this.api.deleteFromPlaylist(this.userId, gameId).subscribe(
       (response) => {

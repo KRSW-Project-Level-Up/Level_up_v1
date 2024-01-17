@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import ValidateForm from '../../helpers/validationform';
 import { Router } from '@angular/router';
 import { NgToastService } from 'ng-angular-popup';
-import { UserStoreService } from 'src/app/services/user-store.service';
 
 @Component({
   selector: 'app-signup',
@@ -20,8 +19,7 @@ export class SignupComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
-    private toast: NgToastService,
-    private userStore: UserStoreService
+    private toast: NgToastService
   ) {}
 
   ngOnInit() {

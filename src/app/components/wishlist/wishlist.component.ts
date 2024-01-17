@@ -62,11 +62,9 @@ export class WishlistComponent implements OnInit {
 
     Promise.all(gamesDetailsPromises)
       .then((gamesDetails) => {
-        // Filter out any undefined or null results
         this.games = gamesDetails
           .filter((game) => game != null)
           .map((game: any) => {
-            // Specify the type of 'game' as 'any'
             const wishlistItem = this.wishlistArray.find(
               (item) => item.game_id === game.id
             );

@@ -24,17 +24,14 @@ export class UserModel {
     this.username = payload?.userName;
     this.age = payload?.age;
     this.nationality = payload?.nationality;
-    // Add other fields as necessary
   }
-
-  // Additional methods can be added here if needed
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  //  5e0777bd6c2d4224b067677abeda0113  API Key : 5e0777bd6c2d4224b067677abeda0113
+  //    API Key : 5e0777bd6c2d4224b067677abeda0113
 
   private baseUrl: string = 'http://127.0.0.1:5000/';
   public user: UserModel = new UserModel();
@@ -42,15 +39,7 @@ export class AuthService {
   private userPayload: any;
   constructor(private http: HttpClient, private router: Router) {
     this.userPayload = this.decodedToken();
-    //this.updateUserModel();
   }
-  /* updateUserPayload() {
-    this.userPayload = this.decodedToken();
-  }
-  updateUserModel() {
-    const payload = this.decodedToken();
-    this.user.updateFromTokenPayload(payload);
-  }*/
 
   signUp(userObj: any) {
     return this.http.post<any>(`${this.baseUrl}signup`, userObj);
@@ -61,8 +50,6 @@ export class AuthService {
       tap((response) => {
         if (response.token) {
           this.storeToken(response.token);
-          // this.updateUserModel();
-          console.log('user', this.user);
         }
       })
     );
@@ -84,15 +71,12 @@ export class AuthService {
       return new UserModel();
     }
   }
-  /* updateUserInfo(userObj: any) {
-    return this.http.post<any>(`${this.baseUrl}updateuserinfo`, userObj);
-  }*/
 
   updateUserInfo(userObj: any) {
     return this.http.put<any>(`${this.baseUrl}updateuserinfo`, userObj).pipe(
       tap((response) => {
         if (response && response.token) {
-          this.storeToken(response.token); // Store the new token
+          this.storeToken(response.token);
         }
       })
     );

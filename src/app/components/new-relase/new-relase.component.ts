@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
 import { GameModel } from 'src/app/models/game-model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { UserStoreService } from 'src/app/services/user-store.service';
 
 @Component({
   selector: 'app-new-relase',
@@ -16,28 +14,22 @@ export class NewRelaseComponent implements OnInit {
   public originalGames: any[] = [];
   public lastGames: any[] = [];
   public allGames: any[] = [];
-  userId: number = 0;
+  public userId: number = 0;
 
-  public role!: string;
-  likeCount = 0;
-  dislikeCount = 0;
+  public likeCount = 0;
+  public dislikeCount = 0;
   public gameMine!: GameModel;
   public searchTerm: string = '';
   isLoading: boolean = false;
 
   public fullName: string = '';
-  constructor(
-    private api: ApiService,
-    private auth: AuthService,
-    private userStore: UserStoreService
-  ) {}
+  constructor(private api: ApiService, private auth: AuthService) {}
 
   ngOnInit() {
     this.api.getUsers().subscribe((res) => {
       this.users = res;
     });
 
-    // Fetch the last games directly
     this.getLastGames();
   }
 
@@ -80,21 +72,16 @@ export class NewRelaseComponent implements OnInit {
   incrementLike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      console.log('Sending like update for gameId:', gameId);
       this.updateLikedGameIds(gameId);
 
       this.api.addGameRating(this.userId, gameId, 'like').subscribe(
         (response: any) => {
-          console.log('Like count updated:', response);
           this.games[gameIndex].likeCount = response.total_likes;
           this.games[gameIndex].dislikeCount = response.total_dislikes;
-          this.games = [...this.games]; // Create a new array to trigger change detection
-
-          console.log('this.games[gameIndex]', this.games[gameIndex]);
+          this.games = [...this.games];
         },
         (error) => {
           console.error('Error updating like count:', error);
-          // Optionally handle error (e.g., revert optimistic UI update)
         }
       );
     }
@@ -103,7 +90,6 @@ export class NewRelaseComponent implements OnInit {
   incrementDislike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      console.log('Sending dislike update for gameId:', gameId);
       this.updateDislikedGameIds(gameId);
 
       this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
@@ -162,7 +148,7 @@ export class NewRelaseComponent implements OnInit {
       ios: 'ios-smartphone-svgrepo-com.svg',
       web: 'web-svgrepo-com',
     };
-    return '/assets/icons/' + (iconsMap[slug] || 'help.svg'); // Default to 'help.svg' if no match is found
+    return '/assets/icons/' + (iconsMap[slug] || 'help.svg');
   }
 
   logout() {

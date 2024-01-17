@@ -20,11 +20,6 @@ export class ApiService {
   getUsers() {
     return this.http.get<any>(this.baseUrl);
   }
-  /* getPlatforms() {
-    const url = `https://api.rawg.io/api/platforms?key=${this.API_KEY}`;
-    return this.http.get(url);
-  }*/
-
   getGamesForPeriod() {
     const url = `https://api.rawg.io/api/games?key=${this.API_KEY}&page=2&page_size=100&ordering=-rating`;
     return this.http.get(url);

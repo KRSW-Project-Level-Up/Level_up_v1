@@ -52,7 +52,6 @@ export class LoginComponent implements OnInit {
             duration: 5000,
           });
 
-          this.userStore.setRoleForStore(response.role);
           this.userStore.setUSerIdForStore(response.user_id);
 
           this.router.navigate(['home']);

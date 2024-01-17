@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
 import { GameModel } from 'src/app/models/game-model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { UserStoreService } from 'src/app/services/user-store.service';
 
 @Component({
   selector: 'app-top-in',
@@ -16,20 +14,16 @@ export class TopInComponent implements OnInit {
   public originalGames: any[] = [];
   public lastGames: any[] = [];
   public allGames: any[] = [];
+  public userId: number = 0;
 
-  public role!: string;
-  likeCount = 0;
-  dislikeCount = 0;
+  public likeCount = 0;
+  public dislikeCount = 0;
   public gameMine!: GameModel;
   public searchTerm: string = '';
   isLoading: boolean = false;
 
   public fullName: string = '';
-  constructor(
-    private api: ApiService,
-    private auth: AuthService,
-    private userStore: UserStoreService
-  ) {}
+  constructor(private api: ApiService, private auth: AuthService) {}
 
   ngOnInit() {
     this.getTopGames();
@@ -39,7 +33,6 @@ export class TopInComponent implements OnInit {
   }
 
   getTopGames() {
-    // Try to retrieve the game list from session storage
     const storedGames = sessionStorage.getItem('allGames');
     if (storedGames) {
       this.allGames = JSON.parse(storedGames);
@@ -53,7 +46,6 @@ export class TopInComponent implements OnInit {
   }
 
   sortAndMapGames() {
-    // Sort games by rating_top in ascending order and map them
     const sortedGames = this.allGames.sort(
       (a: any, b: any) => b.rating_top - a.rating_top
     );
@@ -74,27 +66,76 @@ export class TopInComponent implements OnInit {
     }
   }
 
+  updateSessionStorage() {
+    sessionStorage.setItem('allGames', JSON.stringify(this.games));
+  }
   incrementLike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      this.games[gameIndex].likeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
+      this.updateLikedGameIds(gameId);
+
+      this.api.addGameRating(this.userId, gameId, 'like').subscribe(
+        (response: any) => {
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+          this.games = [...this.games];
+          this.updateSessionStorage();
+        },
+        (error) => {
+          console.error('Error updating like count:', error);
+        }
+      );
     }
   }
 
   incrementDislike(gameId: number) {
     const gameIndex = this.games.findIndex((g) => g.id === gameId);
     if (gameIndex !== -1) {
-      this.games[gameIndex].dislikeCount++;
-      // Update the allGames array in the session storage
-      this.updateSessionStorage();
+      this.updateDislikedGameIds(gameId);
+
+      this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
+        (response: any) => {
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+          this.updateSessionStorage();
+        },
+        (error) => {
+          console.error('Error updating dislike count:', error);
+        }
+      );
+    }
+  }
+  private updateLikedGameIds(gameId: number) {
+    let likedGameIds = this.getLikedGameIds();
+    if (!likedGameIds.includes(gameId)) {
+      likedGameIds.push(gameId);
+      localStorage.setItem('likedGameIds', JSON.stringify(likedGameIds));
     }
   }
 
-  updateSessionStorage() {
-    sessionStorage.setItem('allGames', JSON.stringify(this.games));
+  private updateDislikedGameIds(gameId: number) {
+    let dislikedGameIds = this.getDislikedGameIds();
+    if (!dislikedGameIds.includes(gameId)) {
+      dislikedGameIds.push(gameId);
+      localStorage.setItem('dislikedGameIds', JSON.stringify(dislikedGameIds));
+    }
   }
+  private getLikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('likedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
+  }
+
+  private getDislikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('dislikedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
+  }
+  getGameIdLists() {
+    return {
+      likedGameIds: this.getLikedGameIds(),
+      dislikedGameIds: this.getDislikedGameIds(),
+    };
+  }
+
   getPlatformIcon(slug: string): string {
     const iconsMap: { [key: string]: string } = {
       pc: 'windows-svgrepo-com.svg',
@@ -107,7 +148,7 @@ export class TopInComponent implements OnInit {
       ios: 'ios-smartphone-svgrepo-com.svg',
       web: 'web-svgrepo-com',
     };
-    return '/assets/icons/' + (iconsMap[slug] || 'help.svg'); // Default to 'help.svg' if no match is found
+    return '/assets/icons/' + (iconsMap[slug] || 'help.svg');
   }
 
   logout() {

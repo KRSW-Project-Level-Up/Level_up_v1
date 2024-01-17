@@ -64,13 +64,11 @@ export class UserComponent implements OnInit {
     if (this.signUpForm.valid) {
       console.log(this.signUpForm.value);
 
-      // Prepare the object to be sent to the backend
       let signUpObj = {
         userInfo: {
           ...this.signUpForm.value,
-          // Assuming the token is not required to be sent for updating user info
         },
-        sessionData: {}, // Additional session data if needed
+        sessionData: {}, 
       };
 
       // Make an API call for updating user information
@@ -83,16 +81,13 @@ export class UserComponent implements OnInit {
             duration: 5000,
           });
 
-          // If the server responds with a new token, store it
           if (response.token) {
             this.auth.storeToken(response.token);
           }
 
-          // Refresh user information
           this.currentUser = this.auth.getUserFromToken();
           this.updateFormWithCurrentUser();
 
-          // Navigate to the home page or any other page as required
           this.router.navigate(['/home']);
         },
         error: (error) => {
@@ -120,7 +115,6 @@ export class UserComponent implements OnInit {
       nationality: this.currentUser.nationality,
     });
 
-    // If the email should remain disabled after update
     this.signUpForm.get('email')?.disable();
   }
 
