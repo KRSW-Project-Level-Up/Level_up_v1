@@ -76,86 +76,78 @@ export class NewRelaseComponent implements OnInit {
       this.games = [...this.originalGames];
     }
   }
-  /*incrementLike(gameId: number) {
-    const gameIndex = this.games.findIndex((g) => g.id === gameId);
-    if (gameIndex !== -1) {
-      this.games[gameIndex].likeCount++;
-      const dataToSend = {
-        userId: this.userId,
-        gameId: gameId,
-        likeCount: this.games[gameIndex].likeCount,
-        dislikeCount: this.games[gameIndex].dislikeCount,
-      };
 
-      console.log('Sending like update:', dataToSend);
-
-      this.api
-        .addGameRating(
-          this.userId,
-          gameId,
-          this.games[gameIndex].likeCount,
-          this.games[gameIndex].dislikeCount
-        )
-        .subscribe(
-          (response) => {
-            console.log('Like count updated:', response);
-          },
-          (error) => {
-            console.error('Error updating like count:', error);
-          }
-        );
-    }
-  }
-
-  incrementDislike(gameId: number) {
-    const gameIndex = this.games.findIndex((g) => g.id === gameId);
-    if (gameIndex !== -1) {
-      this.games[gameIndex].dislikeCount++;
-      const dataToSend = {
-        userId: this.userId,
-        gameId: gameId,
-        likeCount: this.games[gameIndex].likeCount,
-        dislikeCount: this.games[gameIndex].dislikeCount,
-      };
-
-      console.log('Sending dislike update:', dataToSend);
-      this.api
-        .addGameRating(
-          this.userId,
-          gameId,
-          this.games[gameIndex].likeCount,
-          this.games[gameIndex].dislikeCount
-        )
-        .subscribe(
-          (response) => {
-            console.log('Dislike count updated:', response);
-          },
-          (error) => {
-            console.error('Error updating dislike count:', error);
-          }
-        );
-    }
-  }*/
   incrementLike(gameId: number) {
-    this.api.addGameRating(this.userId, gameId, 'like').subscribe(
-      (response) => {
-        console.log('Like count updated:', response);
-      },
-      (error) => {
-        console.error('Error updating like count:', error);
-      }
-    );
+    const gameIndex = this.games.findIndex((g) => g.id === gameId);
+    if (gameIndex !== -1) {
+      console.log('Sending like update for gameId:', gameId);
+      this.updateLikedGameIds(gameId);
+
+      this.api.addGameRating(this.userId, gameId, 'like').subscribe(
+        (response: any) => {
+          console.log('Like count updated:', response);
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+          this.games = [...this.games]; // Create a new array to trigger change detection
+
+          console.log('this.games[gameIndex]', this.games[gameIndex]);
+        },
+        (error) => {
+          console.error('Error updating like count:', error);
+          // Optionally handle error (e.g., revert optimistic UI update)
+        }
+      );
+    }
   }
 
   incrementDislike(gameId: number) {
-    this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
-      (response) => {
-        console.log('Dislike count updated:', response);
-      },
-      (error) => {
-        console.error('Error updating dislike count:', error);
-      }
-    );
+    const gameIndex = this.games.findIndex((g) => g.id === gameId);
+    if (gameIndex !== -1) {
+      console.log('Sending dislike update for gameId:', gameId);
+      this.updateDislikedGameIds(gameId);
+
+      this.api.addGameRating(this.userId, gameId, 'dislike').subscribe(
+        (response: any) => {
+          console.log('Dislike count updated:', response);
+          // Update the game's dislike count in the frontend state
+          this.games[gameIndex].likeCount = response.total_likes;
+          this.games[gameIndex].dislikeCount = response.total_dislikes;
+        },
+        (error) => {
+          console.error('Error updating dislike count:', error);
+        }
+      );
+    }
+  }
+  private updateLikedGameIds(gameId: number) {
+    let likedGameIds = this.getLikedGameIds();
+    if (!likedGameIds.includes(gameId)) {
+      likedGameIds.push(gameId);
+      localStorage.setItem('likedGameIds', JSON.stringify(likedGameIds));
+    }
+  }
+
+  private updateDislikedGameIds(gameId: number) {
+    let dislikedGameIds = this.getDislikedGameIds();
+    if (!dislikedGameIds.includes(gameId)) {
+      dislikedGameIds.push(gameId);
+      localStorage.setItem('dislikedGameIds', JSON.stringify(dislikedGameIds));
+    }
+  }
+  private getLikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('likedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
+  }
+
+  private getDislikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('dislikedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
+  }
+  getGameIdLists() {
+    return {
+      likedGameIds: this.getLikedGameIds(),
+      dislikedGameIds: this.getDislikedGameIds(),
+    };
   }
 
   getPlatformIcon(slug: string): string {

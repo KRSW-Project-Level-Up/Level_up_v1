@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-playlist',
@@ -10,9 +11,13 @@ import { UserStoreService } from 'src/app/services/user-store.service';
 })
 export class PlaylistComponent implements OnInit {
   public playlist: any[] = [];
+  public playlistArray: any[] = [];
+
   public games: any[] = [];
   userId: number = 0;
   currentUser: any;
+  likeCount = 0;
+  dislikeCount = 0;
 
   constructor(
     private api: ApiService,
@@ -33,13 +38,12 @@ export class PlaylistComponent implements OnInit {
   loadPlaylist(userId: number) {
     this.api.getAllPlaylist(userId).subscribe(
       (response) => {
-        // Access the playlist array from the response object
-        const playlistArray = (response as any).playlist;
-
-        // Ensure that playlistArray is defined and is an array
-        if (Array.isArray(playlistArray)) {
+        this.playlistArray = (response as any).playlist;
+        this.likeCount; // = playlistArray.filter((item) => item.like === true).length;
+        console.log('playlistArray', this.playlistArray);
+        if (Array.isArray(this.playlistArray)) {
           const uniqueGameIds = new Set(
-            playlistArray.map((item) => item.game_id)
+            this.playlistArray.map((item) => item.game_id)
           );
           const playlistIds = Array.from(uniqueGameIds);
 
@@ -57,19 +61,33 @@ export class PlaylistComponent implements OnInit {
 
   fetchGamesDetails(gameIds: number[]) {
     const gamesDetailsPromises = gameIds.map((gameId) =>
-      this.api.getGameById(gameId.toString()).toPromise()
+      firstValueFrom(this.api.getGameById(gameId.toString()))
     );
 
     Promise.all(gamesDetailsPromises)
       .then((gamesDetails) => {
-        this.playlist = gamesDetails;
-        this.games = gamesDetails;
+        // Filter out any undefined or null results
+        this.games = gamesDetails
+          .filter((game) => game != null)
+          .map((game: any) => {
+            // Specify the type of 'game' as 'any'
+            const playlistItem = this.playlistArray.find(
+              (item) => item.game_id === game.id
+            );
+            return {
+              ...game,
+              like_count: playlistItem ? playlistItem.like_count : 0,
+              dislike_count: playlistItem ? playlistItem.dislike_count : 0,
+            };
+          });
+        this.playlist = this.games; // Update your playlist
         console.log('Playlist with game details:', this.playlist);
       })
       .catch((error) => {
         console.error('Error fetching games details', error);
       });
   }
+
   // add button to delete from playlist in playlist.component.html
   deleteFromPlaylist(gameId: number) {
     this.api.deleteFromPlaylist(this.userId, gameId).subscribe(

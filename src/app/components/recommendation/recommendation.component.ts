@@ -4,6 +4,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Neo4jServiceService } from 'src/app/services/neo4j.service.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
+import { HomeComponent } from '../home/home.component';
 
 @Component({
   selector: 'app-recommendation',
@@ -21,36 +22,35 @@ export class RecommendationComponent implements OnInit {
   recommendedGames: Neo4jModel[] = [];
   detailedGames: any[] = [];
   isLoading: boolean = false;
+  likedGameIds: any[] = [];
+  dislikedGameIds: any[] = [];
 
   ngOnInit(): void {
+    this.likedGameIds = this.getLikedGameIds();
+    this.dislikedGameIds = this.getDislikedGameIds();
     this.processStoredGames();
   }
-
-  processStoredGames() {
-    const storedGames = sessionStorage.getItem('allGames');
-    if (storedGames) {
-      const games: any[] = JSON.parse(storedGames);
-
-      const likedGameIds = games
-        .filter((game) => game.likeCount > 0)
-        .map((game) => game.id);
-      const dislikedGameIds = games
-        .filter((game) => game.dislikeCount > 0)
-        .map((game) => game.id);
-
-      this.neo4jService
-        .getCommonNodes(likedGameIds, dislikedGameIds)
-        .then((recommendedGames) => {
-          this.recommendedGames = recommendedGames;
-          console.log('Recommended Games:', this.recommendedGames);
-          this.fetchGamesDetails(recommendedGames);
-        })
-        .catch((error) => {
-          console.error('Error fetching recommended games:', error);
-        });
-    }
+  private getLikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('likedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
   }
 
+  private getDislikedGameIds(): number[] {
+    const storedIds = localStorage.getItem('dislikedGameIds');
+    return storedIds ? JSON.parse(storedIds) : [];
+  }
+  processStoredGames() {
+    this.neo4jService
+      .getCommonNodes(this.likedGameIds, this.dislikedGameIds)
+      .then((recommendedGames) => {
+        this.recommendedGames = recommendedGames;
+        console.log('Recommended Games:', this.recommendedGames);
+        this.fetchGamesDetails(recommendedGames);
+      })
+      .catch((error) => {
+        console.error('Error fetching recommended games:', error);
+      });
+  }
   fetchGamesDetails(recommendedGames: Neo4jModel[]) {
     this.isLoading = true;
     const uniqueGameIds = new Set(recommendedGames.map((game) => game.id));

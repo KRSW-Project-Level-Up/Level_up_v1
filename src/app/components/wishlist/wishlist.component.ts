@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-wishlist',
@@ -16,6 +17,8 @@ export class WishlistComponent implements OnInit {
   ) {}
 
   public wishlist: any[] = [];
+  public wishlistArray: any[] = [];
+
   public games: any[] = [];
   userId: number = 0;
   currentUser: any;
@@ -51,21 +54,36 @@ export class WishlistComponent implements OnInit {
       }
     );
   }
+
   fetchGamesDetails(gameIds: number[]) {
     const gamesDetailsPromises = gameIds.map((gameId) =>
-      this.api.getGameById(gameId.toString()).toPromise()
+      firstValueFrom(this.api.getGameById(gameId.toString()))
     );
 
     Promise.all(gamesDetailsPromises)
       .then((gamesDetails) => {
-        this.wishlist = gamesDetails;
-        this.games = gamesDetails;
+        // Filter out any undefined or null results
+        this.games = gamesDetails
+          .filter((game) => game != null)
+          .map((game: any) => {
+            // Specify the type of 'game' as 'any'
+            const wishlistItem = this.wishlistArray.find(
+              (item) => item.game_id === game.id
+            );
+            return {
+              ...game,
+              like_count: wishlistItem ? wishlistItem.like_count : 0,
+              dislike_count: wishlistItem ? wishlistItem.dislike_count : 0,
+            };
+          });
+        this.wishlist = this.games;
         console.log('Playlist with game details:', this.wishlist);
       })
       .catch((error) => {
         console.error('Error fetching games details', error);
       });
   }
+
   deleteFromWishlist(gameId: number) {
     this.api.deleteFromWishlist(this.userId, gameId).subscribe(
       (response) => {

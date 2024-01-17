@@ -60,10 +60,9 @@
                       <td>{{ game.released }}</td>
                       <td>{{ game.rating }}</td>
                       <td>{{ game.playtime }}</td>
-                      <td>{{ game.likeCount }}</td>
-                      <td>{{ game.dislikeCount }}</td>
+                      <td>{{ game.like_count }}</td>
+                      <td>{{ game.dislike_count }}</td>
                       <td>
-                        <!-- or use an icon if you have an icon library -->
                         <i
                           class="fa fa-trash"
                           (click)="deleteFromWishlist(game.id)"
