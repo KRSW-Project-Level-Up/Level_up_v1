@@ -7,7 +7,7 @@ import { GameModel } from '../models/game-model';
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl: string = 'https://localhost:7058/api/User/';
+  private baseUrl: string = 'http://127.0.0.1:5000/';
   private API_KEY = '5e0777bd6c2d4224b067677abeda0113';
   private gamesSource = new BehaviorSubject<any[]>([]);
   currentGames = this.gamesSource.asObservable();
@@ -42,70 +42,76 @@ export class ApiService {
     return this.http.get(url);
   }
 
-  addToPlaylistAPI(gameId: number, userId: number) {
-    const url = `${this.baseUrl}/playlist/add`;
+  addToPlaylist(gameId: number, userId: number) {
+    const url = 'http://127.0.0.1:5000/addtoplaylist';
     const data = {
-      gameId: gameId,
-      addedDate: new Date().toISOString(),
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
     return this.http.post(url, data);
   }
 
-  addToWishlistAPI(gameId: number, userId: number) {
-    const url = `${this.baseUrl}/wishlist/add`;
+  addToWishlist(gameId: number, userId: number) {
+    const url = 'http://127.0.0.1:5000/addtowishlist';
     const data = {
-      gameId: gameId,
-      addedDate: new Date().toISOString(),
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
     return this.http.post(url, data);
   }
+  getAllPlaylist(userId: number): Observable<any[]> {
+    const url = `${this.baseUrl}getallplaylist/${userId}`;
+    return this.http.get<any[]>(url);
+  }
 
-  addGameRating(
-    userId: number,
-    gameId: number,
-    likeCount: number,
-    dislikeCount: number
-  ) {
-    const url = `${this.baseUrl}/games/rating`;
+  getAllWishlist(userId: number): Observable<any[]> {
+    const url = `${this.baseUrl}getallwishlist/${userId}`;
+    return this.http.get<any[]>(url);
+  }
+
+  addGameRating(userId: number, gameId: number, action: string) {
+    const url = `${this.baseUrl}updategamerating`;
     const data = {
-      userId: userId,
-      gameId: gameId,
-      likeCount: likeCount,
-      dislikeCount: dislikeCount,
+      user_id: userId,
+      game_id: gameId,
+      action: action, // 'like' or 'dislike'
     };
 
     return this.http.post(url, data);
+  }
+  getAllGamesRating() {
+    const url = `${this.baseUrl}gamesrating`;
+    return this.http.get(url);
   }
 
   getPlaylist(userId: number): Observable<{ playlistIds: number[] }> {
-    const url = `${this.baseUrl}/users/${userId}/playlist`;
+    const url = `${this.baseUrl}users/${userId}/playlist`;
     return this.http.get<{ playlistIds: number[] }>(url);
   }
   getWishlist(userId: number): Observable<{ wishlistIds: number[] }> {
-    const url = `${this.baseUrl}/users/${userId}/playlist`;
+    const url = `${this.baseUrl}users/${userId}/playlist`;
     return this.http.get<{ wishlistIds: number[] }>(url);
   }
 
   getGameRating(userId: number, gameId: number) {
-    const url = `${this.baseUrl}/games/${gameId}/rating?userId=${userId}`;
+    const url = `${this.baseUrl}games/${gameId}/rating?userId=${userId}`;
     return this.http.get<{ likeCount: number; dislikeCount: number }>(url);
   }
-  deleteFromWishlist(gameId: number, userId: number) {
-    const url = `${this.baseUrl}/wishlist/delete`;
+  deleteFromWishlist(userId: number, gameId: number) {
+    const url = 'http://127.0.0.1:5000/deletefromwishlist';
     const data = {
-      gameId: gameId,
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
-    return this.http.request('delete', url, { body: data });
+    console.log('Sending to wishlist:', data);
+    return this.http.post(url, data);
   }
-  deleteFromPlaylist(gameId: number, userId: number) {
-    const url = `${this.baseUrl}/playlist/delete`;
+  deleteFromPlaylist(userId: number, gameId: number) {
+    const url = 'http://127.0.0.1:5000/deletefromplaylist';
     const data = {
-      gameId: gameId,
-      userId: userId,
+      user_id: userId,
+      game_id: gameId,
     };
-    return this.http.request('delete', url, { body: data });
+    return this.http.post(url, data);
   }
 }
