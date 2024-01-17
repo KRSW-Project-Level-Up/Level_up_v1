@@ -42,7 +42,6 @@ export class HomeComponent implements OnInit {
       const user = this.auth.getUserFromToken();
       this.currentUser = user;
       this.userId = this.currentUser.user_id;
-      console.log('userNew', this.userId);
     });
   }
 

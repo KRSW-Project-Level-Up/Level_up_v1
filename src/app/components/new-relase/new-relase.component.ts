@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GameModel } from 'src/app/models/game-model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { UserStoreService } from 'src/app/services/user-store.service';
 
 @Component({
   selector: 'app-new-relase',
@@ -15,6 +16,7 @@ export class NewRelaseComponent implements OnInit {
   public lastGames: any[] = [];
   public allGames: any[] = [];
   public userId: number = 0;
+  public currentUser: any;
 
   public likeCount = 0;
   public dislikeCount = 0;
@@ -23,13 +25,18 @@ export class NewRelaseComponent implements OnInit {
   isLoading: boolean = false;
 
   public fullName: string = '';
-  constructor(private api: ApiService, private auth: AuthService) {}
+  constructor(
+    private api: ApiService,
+    private auth: AuthService,
+    private userStore: UserStoreService
+  ) {}
 
   ngOnInit() {
-    this.api.getUsers().subscribe((res) => {
-      this.users = res;
+    this.userStore.getUserFromStore().subscribe((val) => {
+      const user = this.auth.getUserFromToken();
+      this.currentUser = user;
+      this.userId = this.currentUser.user_id;
     });
-
     this.getLastGames();
   }
 
