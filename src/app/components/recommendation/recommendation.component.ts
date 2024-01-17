@@ -3,8 +3,6 @@ import { Neo4jModel } from 'src/app/models/neo4j-models';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Neo4jServiceService } from 'src/app/services/neo4j.service.service';
-import { UserStoreService } from 'src/app/services/user-store.service';
-import { HomeComponent } from '../home/home.component';
 
 @Component({
   selector: 'app-recommendation',
@@ -15,7 +13,6 @@ export class RecommendationComponent implements OnInit {
   constructor(
     private api: ApiService,
     private auth: AuthService,
-    private userStore: UserStoreService,
     private neo4jService: Neo4jServiceService
   ) {}
 
@@ -44,7 +41,6 @@ export class RecommendationComponent implements OnInit {
       .getCommonNodes(this.likedGameIds, this.dislikedGameIds)
       .then((recommendedGames) => {
         this.recommendedGames = recommendedGames;
-        console.log('Recommended Games:', this.recommendedGames);
         this.fetchGamesDetails(recommendedGames);
       })
       .catch((error) => {
@@ -83,7 +79,7 @@ export class RecommendationComponent implements OnInit {
       ios: 'ios-smartphone-svgrepo-com.svg',
       web: 'web-svgrepo-com',
     };
-    return '/assets/icons/' + (iconsMap[slug] || 'help.svg'); // Default to 'help.svg' if no match is found
+    return '/assets/icons/' + (iconsMap[slug] || 'help.svg');
   }
 
   logout() {

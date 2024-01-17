@@ -12,13 +12,7 @@ import { UserStoreService } from 'src/app/services/user-store.service';
   styleUrls: ['./sidomenu.component.scss'],
 })
 export class SidomenuComponent implements OnInit {
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private api: ApiService,
-    private auth: AuthService,
-    private userStore: UserStoreService
-  ) {}
+  constructor(private api: ApiService, private auth: AuthService) {}
 
   public users: any = [];
   public games: any[] = [];
@@ -44,76 +38,8 @@ export class SidomenuComponent implements OnInit {
       this.games = JSON.parse(storedGames);
       console.log(this.allGames);
     } else {
-      //  this.fetchAllGames();
     }
-
-    /* this.api.getGamesForPeriod().subscribe((data: any) => {
-    this.originalGames = data.results.map((game: any) => ({
-      ...game, 
-      likeCount: 0, 
-      dislikeCount: 0 
-    }));
-    this.allGames.push(...this.originalGames);
-    console.log(this.originalGames)
-  });*/
-
-    /*this.userStore.getRoleFromStore().subscribe((val) => {
-      const roleFromToken = this.auth.getRoleFromToken();
-      this.role = val || roleFromToken;
-    });*/
   }
-  /*
-fetchAllGames() {
-  forkJoin({
-    gamesbyPeriod: this.api.getGamesForPeriod(),
-    lastGames: this.api.getLastGames(),
-    topGames: this.api.getLastGames(),
-  }).subscribe((results: {gamesbyPeriod:any, lastGames: any, topGames: any }) => {
-    this.games =this.allGames = [
-      ...results.gamesbyPeriod.results.map((game: any) => ({...game, likeCount: 0, dislikeCount: 0})),
-      ...results.lastGames.results.map((game: any) => ({...game, likeCount: 0, dislikeCount: 0})),
-      ...results.topGames.results.map((game: any) => ({...game, likeCount: 0, dislikeCount: 0})),
-    ];
-    sessionStorage.setItem('allGames', JSON.stringify(this.allGames));
-
-  });
-}*/
-
-  /*getLastGames() {
-  this.api.getLastGames().subscribe((data: any) => {
-    const sortedGames = data.results.sort((a: any, b: any) => {
-      const dateA = new Date(a.released);
-      const dateB = new Date(b.released);
-      return dateB.getTime() - dateA.getTime();
-    });
-
-    this.allGames = sortedGames.map((game: any) => ({
-      ...game,
-      likeCount: 0,
-      dislikeCount: 0
-    }));
-
-    // Update 'games' for display
-    this.games = [...this.allGames];
-  });
-}
-
-getTopGames() {
-  this.api.getLastGames().subscribe((data: any) => {  // Assuming getTopGames() is the correct method
-    const sortedGames = data.results.sort((a: any, b: any) => {
-      return b.rating_top - a.rating_top;
-    });
-
-    this.allGames = sortedGames.map((game: any) => ({
-      ...game,
-      likeCount: 0,
-      dislikeCount: 0
-    }));
-
-    // Update 'games' for display
-    this.games = [...this.allGames];
-  });
-}*/
 
   filterGames() {
     if (this.searchTerm) {
